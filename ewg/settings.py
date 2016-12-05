@@ -45,7 +45,7 @@ DEFAULT_REQUEST_HEADERS = {
   'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.6,en-US;q=0.4,en;q=0.2',
   'Cache-Control':'max-age=0',
   'Connection':'keep-alive',
-  'Upgrade-Insecure-Requests','1',
+  'Upgrade-Insecure-Requests':'1',
 }
 
 # Enable or disable spider middlewares
