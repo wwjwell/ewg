@@ -7,22 +7,53 @@
 
 import scrapy
 from scrapy.selector import Selector
-
-
+import category
+import os
 #sudo install_name_tool -change libmysqlclient.18.dylib /usr/local/mysql/lib/libmysqlclient.18.dylib /Library/Python/2.7/site-packages/MySQL_python-1.2.4b4-py2.7-macosx-10.11-intel.egg/_mysql.so
 
 class ListSpider(scrapy.Spider):
+	
+	name = "ewg"
+	allowed_domains = ["ewg.org"]
+	
 	def __init__(self):
 		self.page = 1
 		self.total = 10
-	name = "ewg"
-	allowed_domains = ["ewg.org"]
-	start_urls = ["http://www.ewg.org/skindeep/browse/blush/"]
+		self.categories = category.get_categories()
+		self.category=None
+		# url_list = []
+		# for c in self.categories:
+		# 	url = "http://www.ewg.org/skindeep/browse.php?category=%s&showmore=products&start=%d" % (c.category,(self.page-1)*10)
+		# 	url_list.append(url)
+		# self.start_urls = url_list
+		# print self.start_urls
+
+	def get_url(self):
+		return "http://www.ewg.org/skindeep/browse.php?category=%s&showmore=products&start=%d" % (self.category.category,(self.page-1)*10)
+	def start_requests(self):
+		lst = []
+		for c in self.categories:
+			self.category = c
+        	self.page = 1
+        	url = self.get_url()
+        	print '##############NEW URL======',url
+        	yield scrapy.FormRequest(url,callback = self.parse)#jump to login page
+       
+     def change(self):
+     	for c in self.categories:
+			yield c
+             
 
 	def parse(self,response):
+		self.log('A response from %s just arrived!' % response.url)
 		url = response.url
-		file_name = 'blush/%d.html' % self.page
-		f = open('blush/%d.html' % self.page,'wb')
+		print url
+
+		if not os.path.exists(self.category.name):
+			print "mkdir ",self.category.name
+			os.makedirs(self.category.name)
+		file_name = '%s/%d.html' % (self.category.name,self.page)
+		f = open(file_name,'wb')
 		f.write(response.body)
 		f.close()
 		if self.page == 1:
@@ -33,10 +64,10 @@ class ListSpider(scrapy.Spider):
 		
 		start = self.page * 10 
 		self.page = self.page +1
-		if start>self.total:
-			return
-		print "spider page = %d" % (self.page-1)
-		next_url="http://www.ewg.org/skindeep/browse.php?category=blush&showmore=products&start=%d" % (self.page*10)
-		yield scrapy.Request(next_url, callback=self.parse)
+		if start<self.total:
+			print "spider page = %d" % (self.page-1)
+			yield scrapy.Request(self.get_url(), callback=self.parse)
+		else:
+
 
 	
