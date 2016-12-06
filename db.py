@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 import MySQLdb
-host="zhuanglide.com"
+host="localhost"
 user="ewg"
 passwd="ewg_123456"
 db="ewg"
