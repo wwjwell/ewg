@@ -21,6 +21,7 @@ class ListSpider(scrapy.Spider):
 		self.total = 10
 		self.categories = category.get_categories()
 		self.category=None
+		self.idx = 0
 		# url_list = []
 		# for c in self.categories:
 		# 	url = "http://www.ewg.org/skindeep/browse.php?category=%s&showmore=products&start=%d" % (c.category,(self.page-1)*10)
@@ -30,29 +31,32 @@ class ListSpider(scrapy.Spider):
 
 	def get_url(self):
 		return "http://www.ewg.org/skindeep/browse.php?category=%s&showmore=products&start=%d" % (self.category.category,(self.page-1)*10)
+
+	def next(self):
+		self.idx = self.idx + 1
+		print "-------------------",len(self.categories),self.idx
+		if self.idx <= len(self.categories):
+			self.category = self.categories[self.idx-1]
+			print "##############",self.category.name
+			return True
+		return False
+
 	def start_requests(self):
 		lst = []
-		for c in self.categories:
-			self.category = c
-        	self.page = 1
-        	url = self.get_url()
-        	print '##############NEW URL======',url
-        	yield scrapy.FormRequest(url,callback = self.parse)#jump to login page
-       
-     def change(self):
-     	for c in self.categories:
-			yield c
-             
+		if self.next():
+			url = self.get_url()
+			print "NEW URL=",url
+			yield scrapy.Request(url,callback = self.parse)#jump to login page
 
+	
 	def parse(self,response):
 		self.log('A response from %s just arrived!' % response.url)
-		url = response.url
-		print url
-
-		if not os.path.exists(self.category.name):
-			print "mkdir ",self.category.name
-			os.makedirs(self.category.name)
-		file_name = '%s/%d.html' % (self.category.name,self.page)
+		print response.url
+		path = "html/%s" % self.category.category
+		if not os.path.exists(path):
+			print "mkdir ",path
+			os.makedirs(path)
+		file_name = '%s/%d.html' % (path,self.page)
 		f = open(file_name,'wb')
 		f.write(response.body)
 		f.close()
@@ -61,13 +65,17 @@ class ListSpider(scrapy.Spider):
 			rows = sel.xpath('//table[@id="table-browse"]/tbody/tr[position()>1]')
 			self.total = int(sel.xpath('//span[@class="dark"]/text()').extract()[0].replace(',', ''))
 			print "total=",self.total
-		
+			fcount = open("%s/total.txt" % path,'wb')
+			fcount.write(str(self.total))
+			fcount.close()
 		start = self.page * 10 
 		self.page = self.page +1
 		if start<self.total:
 			print "spider page = %d" % (self.page-1)
 			yield scrapy.Request(self.get_url(), callback=self.parse)
-		else:
+		elif self.next():
+			self.page = 1
+			yield scrapy.Request(self.get_url(),callback = self.parse)#jump to login page
 
 
 	

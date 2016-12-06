@@ -5,6 +5,7 @@ f = open('category.json')
 pj = json.load(f)
 #{"name":"Blush","url":"/skindeep/browse/blush/"},
 #{"name":"Wound treatment","url":"/skindeep/browse/wound+treatment/"}
+#{"name":"Acne treatment","url":"/skindeep/browse/acne+treatment/"},
 class Category:
 	def __init__(self,name,url):
 		self.name = name
