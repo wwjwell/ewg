@@ -37,6 +37,7 @@ class ListSpider(scrapy.Spider):
 		print "-------------------",len(self.categories),self.idx
 		if self.idx <= len(self.categories):
 			self.category = self.categories[self.idx-1]
+			self.page = 1
 			print "##############",self.category.name
 			return True
 		return False
@@ -74,7 +75,6 @@ class ListSpider(scrapy.Spider):
 			print "spider page = %d" % (self.page-1)
 			yield scrapy.Request(self.get_url(), callback=self.parse)
 		elif self.next():
-			self.page = 1
 			yield scrapy.Request(self.get_url(),callback = self.parse)#jump to login page
 
 
