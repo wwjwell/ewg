@@ -1,0 +1,8 @@
+.pyc
+html/
+html/*
+list/
+list/*
+detail/*
+detail/
+*.tar.gz
