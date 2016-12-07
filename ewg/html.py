@@ -5,6 +5,12 @@
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
 from scrapy.selector import Selector
+<<<<<<< HEAD
+=======
+import os
+
+
+>>>>>>> 7d716a51d003aa10f628cfac453fa29c55b5e733
 
 f = open('../blush.html','r')
 body = f.read()
